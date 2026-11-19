@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="pt">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestão de Alunos</title>
+</head>
+
+<body>
+    {% include 'authInfo.html' %}
+
+    <h1 align="center">Gestão de Alunos</h1>
+
+    <h2>Bem-vindo!</h2>
+
+    <p>Escolha uma das opções disponíveis:</p>
+
+    <p><a href="/alunos">Lista de Alunos</a></p>
+
+    <p id="adminMenu" style="display: none;">
+        <a href="/admin">Menu de Administração</a>
+    </p>
+
+    <script>
+        if (sessionStorage.getItem("is_admin") === "true") {
+            document.getElementById("adminMenu").style.display = "block";
+        }
+    </script>
+
+</body>
+</html>
