@@ -7,9 +7,9 @@ document.addEventListener("DOMContentLoaded", function() {
         event.preventDefault();
 
         const token = sessionStorage.getItem("access_token");
-        const is_admin = sessionStorage.getItem("is_admin");
+        const role = sessionStorage.getItem("role");
 
-        if (!token || is_admin !== "true") {
+        if (!token || role !== "admin") {
             mensagem.textContent = "Não tens autorização para adicionar alunos.";
             return;
         }

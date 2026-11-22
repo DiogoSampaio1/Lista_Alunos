@@ -59,42 +59,45 @@ logging.basicConfig(level=logging.DEBUG)
 ## Swagger(app, template_file='../swagger/definitions.yaml'), proxima vez faço o swagger funcionar, mas agora não tenho tempo para isso
 
 
-def admin_required(fn):
-    @wraps(fn)
-    @jwt_required()
-    def wrapper(*args, **kwargs):
+def role_required(*roles_permitidas):
+    def decorator(fn):
 
-        aluno_id = get_jwt_identity()
+        @wraps(fn)
+        @jwt_required()
+        def wrapper(*args, **kwargs):
 
-        with engine.connect() as con:
+            aluno_id = get_jwt_identity()
 
-            query = text("""
-                SELECT is_admin, estado
-                FROM Alunos
-                WHERE aluno_id = :aluno_id
-            """)
+            with engine.connect() as con:
 
-            aluno = con.execute(
-                query,
-                {'aluno_id': aluno_id}
-            ).mappings().fetchone()
+                query = text("""
+                    SELECT role, estado
+                    FROM Alunos
+                    WHERE aluno_id = :aluno_id
+                """)
 
-            if not aluno or aluno['estado'] != 'Ativo':
-                return jsonify({
-                    'message': 'Utilizador não encontrado ou inativo'
-                }), 401
+                utilizador = con.execute(
+                    query,
+                    {'aluno_id': aluno_id}
+                ).mappings().fetchone()
 
-            if not aluno['is_admin']:
-                return jsonify({
-                    'message': 'Acesso negado. Apenas administradores.'
-                }), 403
+                if not utilizador or utilizador['estado'] != 'Ativo':
+                    return jsonify({
+                        'message': 'Utilizador não encontrado ou inativo'
+                    }), 401
 
-        return fn(*args, **kwargs)
+                if utilizador['role'] not in roles_permitidas:
+                    return jsonify({
+                        'message': 'Não tens permissões para realizar esta operação.'
+                    }), 403
 
-    return wrapper
+            return fn(*args, **kwargs)
+
+        return wrapper
+    return decorator
 
 # ##############################################################################
-# ----------------------------------- TURMAS -----------------------------------
+# ----------------------------------- ALUNOS -----------------------------------
 # ##############################################################################
 
 @app.route("/alunos", methods=["GET"])
@@ -130,7 +133,7 @@ def pagina_adicionar_aluno():
 
 
 @app.route("/api/alunos", methods=["POST"])
-@admin_required
+@role_required('admin')
 def adicionar_aluno_api():
     data = request.get_json(silent=True) or {}
 
@@ -160,43 +163,89 @@ def adicionar_aluno_api():
 def pagina_remover_alunos():
     return render_template("remover_alunosT.html")
 
+@app.route("/api/alunos/role/<numero_aluno>", methods=["GET"])
+@role_required('admin')
+def consultar_role_aluno(numero_aluno):
+
+    with engine.connect() as con:
+
+        aluno = con.execute(text("""
+            SELECT numero_aluno, nome_proprio, apelido, role, estado
+            FROM Alunos
+            WHERE numero_aluno = :numero_aluno
+            AND numero_aluno != '123'
+        """), {
+            "numero_aluno": numero_aluno
+        }).mappings().fetchone()
+
+    if not aluno:
+        return jsonify({"message": "Aluno não encontrado."}), 404
+
+    return jsonify({
+        "numero_aluno": aluno["numero_aluno"],
+        "nome": f'{aluno["nome_proprio"]} {aluno["apelido"]}',
+        "role": aluno["role"],
+        "estado": aluno["estado"]
+    }), 200
 
 @app.route("/api/alunos/estado", methods=["PUT"])
-@admin_required
+@role_required('admin')
 def alterar_estado_aluno():
+
     data = request.get_json(silent=True) or {}
 
     numero_aluno = data.get("numero_aluno")
     estado = data.get("estado")
     observacoes = data.get("observacoes") or None
+    nova_role = data.get("role")
 
-    estados_validos = ["Inativo", "Transferido", "Concluido"]
+    estados_validos = ["Ativo", "Inativo", "Transferido", "Concluido"]
+    roles_validas = ["aluno", "professor", "admin"]
 
     if not numero_aluno or estado not in estados_validos:
         return jsonify({"message": "Dados inválidos."}), 400
 
+    if nova_role is not None and nova_role not in roles_validas:
+        return jsonify({"message": "Role inválida."}), 400
+
     with engine.begin() as con:
+
         aluno = con.execute(text("""
-            SELECT aluno_id FROM Alunos
+            SELECT aluno_id, role
+            FROM Alunos
             WHERE numero_aluno = :numero_aluno
             AND numero_aluno != '123'
-        """), {"numero_aluno": numero_aluno}).fetchone()
+        """), {
+            "numero_aluno": numero_aluno
+        }).mappings().fetchone()
 
         if not aluno:
             return jsonify({"message": "Aluno não encontrado."}), 404
 
+        role_atual = aluno["role"]
+
+        if role_atual == "admin" and nova_role is not None:
+            if nova_role != role_atual:
+                return jsonify({
+                    "message": "Não podes alterar a role de outro administrador."
+                }), 403
+
         con.execute(text("""
             UPDATE Alunos
             SET estado = :estado,
-                observacoes = COALESCE(:observacoes, observacoes)
+                observacoes = COALESCE(:observacoes, observacoes),
+                role = COALESCE(:role, role)
             WHERE numero_aluno = :numero_aluno
         """), {
             "estado": estado,
             "observacoes": observacoes,
+            "role": nova_role,
             "numero_aluno": numero_aluno
         })
 
-    return jsonify({"message": "Estado do aluno alterado com sucesso."}), 200
+    return jsonify({
+        "message": "Dados do aluno alterados com sucesso."
+    }), 200
 
 # ##############################################################################
 # ----------------------------------- TURMAS -----------------------------------
@@ -208,12 +257,13 @@ def pagina_turmas():
 
 
 @app.route("/api/turmas", methods=["GET"])
-@admin_required
+@role_required('admin', 'professor')
 def get_turmas_api():
     with engine.connect() as con:
         query = text("""
             SELECT turma_id, codigo, ano_letivo, limite_alunos, ativa
             FROM Turmas
+            WHERE ativa = TRUE
             ORDER BY ano_letivo DESC, codigo ASC
         """)
         resultado = con.execute(query).mappings().all()
@@ -226,7 +276,7 @@ def pagina_adicionar_turmas():
     return render_template("adicionar_turmasT.html")
 
 @app.route("/api/turmas", methods=["POST"])
-@admin_required
+@role_required('admin', 'professor')
 def adicionar_turma_api():
     data = request.get_json(silent=True) or {}
 
@@ -268,7 +318,7 @@ def pagina_gerir_turmas():
 
 
 @app.route("/api/turmas/<int:turma_id>", methods=["PUT"])
-@admin_required
+@role_required('admin', 'professor')
 def editar_turma_api(turma_id):
     data = request.get_json(silent=True) or {}
 
@@ -312,6 +362,170 @@ def editar_turma_api(turma_id):
 
     except IntegrityError:
         return jsonify({"message": "Já existe uma turma com esse código e ano letivo."}), 409
+    
+# #####################################################################################
+# ----------------------------------- TURMA - ALUNO -----------------------------------
+# #####################################################################################
+
+@app.route("/admin/turma_aluno")
+def admin_gerir_alunos_turmas():
+    with engine.connect() as con:
+        turmas = con.execute(text("""
+            SELECT turma_id, codigo, ano_letivo
+            FROM Turmas
+            WHERE ativa = TRUE
+            ORDER BY codigo
+        """)).mappings().all()
+
+    return render_template(
+        "turma_aluno.html",
+        origem="admin",
+        turmas=turmas
+    )
+
+@app.route("/prof/turma_aluno")
+def prof_gerir_alunos_turmas():
+    with engine.connect() as con:
+        turmas = con.execute(text("""
+            SELECT turma_id, codigo, ano_letivo
+            FROM Turmas
+            WHERE ativa = TRUE
+            ORDER BY codigo
+        """)).mappings().all()
+
+    return render_template(
+        "turma_aluno.html",
+        origem="prof",
+        turmas=turmas
+    )
+
+@app.route("/api/turmas/<int:turma_id>/alunos", methods=["GET"])
+@role_required('admin', 'professor')
+def consultar_alunos_turma(turma_id):
+
+    with engine.connect() as con:
+
+        turma = con.execute(text("""
+            SELECT
+                t.turma_id,
+                t.codigo,
+                t.ano_letivo,
+                t.limite_alunos,
+                t.ativa,
+                c.nome AS curso_nome
+            FROM Turmas t
+            LEFT JOIN Cursos c ON t.curso_id = c.curso_id
+            WHERE t.turma_id = :turma_id
+        """), {"turma_id": turma_id}).mappings().fetchone()
+
+        if not turma:
+            return jsonify({"message": "Turma não encontrada."}), 404
+
+        alunos = con.execute(text("""
+            SELECT
+                aluno_id,
+                numero_aluno,
+                nome_proprio,
+                apelido,
+                email
+            FROM Alunos
+            WHERE turma_id = :turma_id
+            ORDER BY apelido, nome_proprio
+        """), {"turma_id": turma_id}).mappings().all()
+
+    return jsonify({
+        "turma": dict(turma),
+        "alunos": [dict(aluno) for aluno in alunos],
+        "total_alunos": len(alunos)
+    }), 200
+
+@app.route("/api/turmas/<int:turma_id>/alunos", methods=["POST"])
+@role_required('admin', 'professor')
+def adicionar_aluno_turma(turma_id):
+
+    data = request.get_json(silent=True) or {}
+    numero_aluno = data.get("numero_aluno")
+
+    if not isinstance(numero_aluno, str) or not numero_aluno.strip():
+        return jsonify({"message": "Número de aluno inválido."}), 400
+
+    with engine.begin() as con:
+
+        turma = con.execute(text("""
+            SELECT turma_id, limite_alunos, ativa
+            FROM Turmas
+            WHERE turma_id = :turma_id
+        """), {"turma_id": turma_id}).mappings().fetchone()
+
+        if not turma:
+            return jsonify({"message": "Turma não encontrada."}), 404
+
+        if not turma["ativa"]:
+            return jsonify({"message": "Esta turma está inativa."}), 400
+
+        aluno = con.execute(text("""
+            SELECT aluno_id, turma_id, estado, role
+            FROM Alunos
+            WHERE numero_aluno = :numero_aluno
+        """), {"numero_aluno": numero_aluno.strip()}).mappings().fetchone()
+
+        if not aluno or aluno["role"] != "aluno":
+            return jsonify({"message": "Aluno não encontrado."}), 404
+
+        if aluno["estado"] != "Ativo":
+            return jsonify({"message": "Só podes adicionar alunos ativos."}), 400
+
+        if aluno["turma_id"] is not None:
+            return jsonify({"message": "Este aluno já pertence a uma turma."}), 409
+
+        total_alunos = con.execute(text("""
+            SELECT COUNT(*)
+            FROM Alunos
+            WHERE turma_id = :turma_id
+        """), {"turma_id": turma_id}).scalar()
+
+        if total_alunos >= turma["limite_alunos"]:
+            return jsonify({"message": "A turma já atingiu o limite de alunos."}), 409
+
+        con.execute(text("""
+            UPDATE Alunos
+            SET turma_id = :turma_id
+            WHERE aluno_id = :aluno_id
+        """), {
+            "turma_id": turma_id,
+            "aluno_id": aluno["aluno_id"]
+        })
+
+    return jsonify({"message": "Aluno adicionado à turma com sucesso."}), 200
+
+@app.route("/api/turmas/<int:turma_id>/alunos/<int:aluno_id>", methods=["DELETE"])
+@role_required('admin', 'professor')
+def remover_aluno_turma(turma_id, aluno_id):
+
+    with engine.begin() as con:
+
+        aluno = con.execute(text("""
+            SELECT aluno_id
+            FROM Alunos
+            WHERE aluno_id = :aluno_id
+            AND turma_id = :turma_id
+        """), {
+            "aluno_id": aluno_id,
+            "turma_id": turma_id
+        }).fetchone()
+
+        if not aluno:
+            return jsonify({
+                "message": "Aluno não encontrado nesta turma."
+            }), 404
+
+        con.execute(text("""
+            UPDATE Alunos
+            SET turma_id = NULL
+            WHERE aluno_id = :aluno_id
+        """), {"aluno_id": aluno_id})
+
+    return jsonify({"message": "Aluno retirado da turma com sucesso."}), 200
 
 # ##############################################################################
 # ----------------------------------- LOGIN -----------------------------------
@@ -335,7 +549,7 @@ def login():
 
     with engine.connect() as con:
         query = text("""
-            SELECT aluno_id, numero_aluno, passphrase, is_admin, estado
+            SELECT aluno_id, numero_aluno, passphrase, role, estado
             FROM Alunos
             WHERE numero_aluno = :numero_aluno
         """)
@@ -354,17 +568,50 @@ def login():
             'access_token': access_token,
             'aluno_id': aluno['aluno_id'],
             'numero_aluno': aluno['numero_aluno'],
-            'is_admin': bool(aluno['is_admin'])
+            'role': aluno['role']
         }), 200
 
+# ##############################################################################
+# ----------------------------------- Prof ------------------------------------
+# ##############################################################################
+
+@app.route("/api/prof", methods=["GET"])
+@role_required('professor')
+def verificar_prof():
+    return jsonify({"message": "Acesso autorizado"}), 200
+
+@app.route("/prof", methods=["GET"])
+def pagina_prof():
+    with engine.connect() as con:
+        turmas = con.execute(text("""
+            SELECT turma_id, codigo, ano_letivo
+            FROM Turmas
+            WHERE ativa = TRUE
+            ORDER BY codigo
+        """)).mappings().all()
+
+    return render_template("profT.html", turmas=turmas)
+
+# ##############################################################################
+# ----------------------------------- Admin -----------------------------------
+# ##############################################################################
+
 @app.route("/api/admin", methods=["GET"])
-@admin_required
+@role_required('admin')
 def verificar_admin():
     return jsonify({"message": "Acesso autorizado"}), 200
 
 @app.route("/admin", methods=["GET"])
 def pagina_admin():
-    return render_template("adminT.html")
+    with engine.connect() as con:
+            turmas = con.execute(text("""
+                SELECT turma_id, codigo, ano_letivo
+                FROM Turmas
+                WHERE ativa = TRUE
+                ORDER BY codigo
+            """)).mappings().all()
+
+    return render_template("adminT.html", turmas=turmas)
 
 @app.route('/')
 def root():

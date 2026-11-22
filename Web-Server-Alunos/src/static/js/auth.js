@@ -1,7 +1,7 @@
 const token = sessionStorage.getItem("access_token");
 const aluno_id = sessionStorage.getItem("aluno_id");
 const numero_aluno = sessionStorage.getItem("numero_aluno");
-const is_admin = sessionStorage.getItem("is_admin");
+const role = sessionStorage.getItem("role");
 
 const authInfo = document.getElementById("authInfo");
 
@@ -15,7 +15,7 @@ if (authInfo) {
             <p><strong>Estado:</strong> Sessão iniciada</p>
             <p><strong>Número de aluno:</strong> ${numero_aluno}</p>
             <p><strong>ID:</strong> ${aluno_id}</p>
-            <p><strong>Administrador:</strong> ${is_admin === "true" ? "Sim" : "Não"}</p>
+            <p><strong>Tipo de utilizador:</strong> ${role}</p>
 
             <br>
 

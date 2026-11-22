@@ -85,7 +85,7 @@ CREATE TABLE Alunos (
     codigo_postal VARCHAR(12),
     localidade VARCHAR(100),
     passphrase VARCHAR(255) NOT NULL,
-    is_admin BOOLEAN NOT NULL DEFAULT FALSE,
+    role ENUM('admin', 'professor', 'aluno') DEFAULT 'aluno',
 
     estado ENUM('Ativo', 'Inativo', 'Transferido', 'Concluido')
         NOT NULL DEFAULT 'Ativo',
@@ -195,11 +195,11 @@ INSERT INTO Cursos (codigo, nome, descricao, duracao_anos) VALUES
 -- DADOS INICIAIS: Turmas
 -- =============================================
 
-INSERT INTO Turmas (curso_id, codigo, ano_letivo, sala, limite_alunos) VALUES
-(1, 'RSI1A', '2026/2027', 'A101', 25),
-(1, 'RSI2A', '2026/2027', 'A102', 25),
-(2, 'GPSI1A', '2026/2027', 'B201', 28),
-(3, 'SIM1A', '2026/2027', 'C301', 24);
+INSERT INTO Turmas (curso_id, codigo, ano_letivo, limite_alunos) VALUES
+(1, 'RSI1A', '2026/2027', 25),
+(1, 'RSI2A', '2026/2027', 25),
+(2, 'GPSI1A', '2026/2027', 28),
+(3, 'SIM1A', '2026/2027', 24);
 
 
 -- =============================================
@@ -208,45 +208,45 @@ INSERT INTO Turmas (curso_id, codigo, ano_letivo, sala, limite_alunos) VALUES
 
 INSERT INTO Alunos
 (turma_id, numero_aluno, nome_proprio, apelido, data_nascimento,
- email, telefone, morada, codigo_postal, localidade, passphrase, is_admin, estado)
+ email, telefone, morada, codigo_postal, localidade, passphrase, role, estado)
 VALUES
 
 (1, 'A2026001', 'João', 'Silva', '2007-03-14',
  'joao.silva@example.com', '910000001',
- 'Rua das Flores, 10', '2735-100', 'Cacém', 'passteste1', FALSE, 'Ativo'),
+ 'Rua das Flores, 10', '2735-100', 'Cacém', 'passteste1', 'aluno', 'Ativo'),
 
 (1, 'A2026002', 'Maria', 'Santos', '2006-11-02',
  'maria.santos@example.com', '910000002',
- 'Rua Central, 25', '2745-200', 'Queluz', 'passteste1', FALSE, 'Ativo'),
+ 'Rua Central, 25', '2745-200', 'Queluz', 'passteste1', 'aluno', 'Ativo'),
 
 (1, 'A2026003', 'Pedro', 'Costa', '2007-07-21',
  'pedro.costa@example.com', '910000003',
- 'Avenida Nova, 8', '2725-300', 'Mem Martins', 'passteste1', FALSE, 'Ativo'),
+ 'Avenida Nova, 8', '2725-300', 'Mem Martins', 'passteste1', 'aluno', 'Ativo'),
 
 (2, 'A2026004', 'Inês', 'Ferreira', '2006-01-30',
  'ines.ferreira@example.com', '910000004',
- 'Rua do Sol, 4', '2730-400', 'Barcarena', 'passteste1', FALSE, 'Ativo'),
+ 'Rua do Sol, 4', '2730-400', 'Barcarena', 'passteste1', 'aluno', 'Ativo'),
 
 (3, 'A2026005', 'Tiago', 'Oliveira', '2005-09-12',
  'tiago.oliveira@example.com', '910000005',
- 'Rua Verde, 17', '2740-500', 'Porto Salvo', 'passteste1', FALSE, 'Ativo'),
+ 'Rua Verde, 17', '2740-500', 'Porto Salvo', 'passteste1', 'aluno', 'Ativo'),
 
 (3, 'A2026006', 'Beatriz', 'Martins', '2007-05-06',
  'beatriz.martins@example.com', '910000006',
- 'Rua do Parque, 6', '2735-600', 'Agualva', 'passteste1', FALSE, 'Ativo'),
+ 'Rua do Parque, 6', '2735-600', 'Agualva', 'passteste1', 'aluno', 'Ativo'),
 
 (4, 'A2026007', 'Diogo', 'Pereira', '2006-12-18',
  'diogo.pereira@example.com', '910000007',
- 'Avenida do Mar, 12', '2780-700', 'Oeiras', 'passteste1', FALSE, 'Ativo'),
+ 'Avenida do Mar, 12', '2780-700', 'Oeiras', 'passteste1', 'aluno', 'Ativo'),
 
 (4, 'A2026008', 'Leonor', 'Rodrigues', '2005-04-25',
  'leonor.rodrigues@example.com', '910000008',
- 'Rua da Escola, 3', '2710-800', 'Sintra', 'passteste1', FALSE, 'Ativo'),
+ 'Rua da Escola, 3', '2710-800', 'Sintra', 'passteste1', 'aluno', 'Ativo'),
 
 (NULL, '123', 'Diogo', 'DEV', '2007-06-21',
  'DiogoDEV@gmail.com', '91111119',
  '.', '.', '.', '$2a$12$nspwSGVpMZG4JN5HCjKO6.p4U7LZNGZrWz9TYoCsJw1TSJopfgswS',
- TRUE, 'Ativo');
+ 'admin', 'Ativo');
 
 
 -- =============================================

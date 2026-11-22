@@ -2,7 +2,7 @@ document.addEventListener("DOMContentLoaded", async function() {
     const token = sessionStorage.getItem("access_token");
     const mensagem = document.getElementById("mensagemAdmin");
 
-    if (!token || sessionStorage.getItem("is_admin") !== "true") {
+    if (!token || sessionStorage.getItem("role") !== "admin") {
         mensagem.textContent = "Não tens autorização para aceder a esta página.";
         return;
     }

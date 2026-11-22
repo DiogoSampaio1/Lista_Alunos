@@ -24,7 +24,7 @@ document.getElementById("loginForm").addEventListener("submit", async function(e
             sessionStorage.setItem("access_token", dados.access_token);
             sessionStorage.setItem("aluno_id", dados.aluno_id);
             sessionStorage.setItem("numero_aluno", dados.numero_aluno);
-            sessionStorage.setItem("is_admin", dados.is_admin);
+            sessionStorage.setItem("role", dados.role);
 
             window.location.href = "/";
         } else {

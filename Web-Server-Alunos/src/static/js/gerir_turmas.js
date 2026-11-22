@@ -8,7 +8,7 @@ document.addEventListener("DOMContentLoaded", async function() {
     let turmas = [];
     let turmaSelecionada = null;
 
-    if (!token || sessionStorage.getItem("is_admin") !== "true") {
+    if (!token || sessionStorage.getItem("role") !== "admin") {
         mensagem.textContent = "Não tens autorização para aceder a esta página.";
         return;
     }

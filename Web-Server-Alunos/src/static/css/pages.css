@@ -1,0 +1,111 @@
+/* ==========================================================================
+   pages.css — ajustes por página (sem classes no HTML)
+   ========================================================================== */
+
+/* ---------- Login: coluna estreita, centrada na vertical ---------- */
+body:has(#loginForm) {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  max-width: 440px;
+}
+
+body:has(#loginForm) h1 {
+  margin-top: 0;
+}
+
+body:has(#loginForm) form,
+body:has(#loginForm) #mensagem {
+  align-self: stretch;
+}
+
+body:has(#loginForm) form {
+  margin-top: 0;
+}
+
+body:has(#loginForm) button[type="submit"] {
+  width: 100%;
+  margin: 1.6rem 0 0;
+}
+
+/* ---------- Mosaicos numerados (índice e menu admin) ---------- */
+body,
+#conteudoAdmin {
+  counter-reset: tile;
+}
+
+body > p > a:not([href="/"]),
+#conteudoAdmin p a {
+  counter-increment: tile;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem 1.25rem;
+  font-weight: 600;
+  color: var(--text);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-sm);
+  text-decoration: none;
+  transition: transform 0.25s var(--ease), border-color 0.25s, box-shadow 0.25s;
+}
+
+/* número em tipo mono */
+body > p > a:not([href="/"])::before,
+#conteudoAdmin p a::before {
+  content: counter(tile, decimal-leading-zero);
+  font: 500 0.8rem ui-monospace, "Cascadia Mono", Consolas, monospace;
+  color: var(--muted);
+  transition: color 0.25s;
+}
+
+body > p > a:not([href="/"])::after,
+#conteudoAdmin p a::after {
+  content: "→";
+  margin-left: auto;
+  color: var(--muted);
+  transition: transform 0.3s var(--ease-spring), color 0.25s;
+}
+
+body > p > a:not([href="/"]):hover,
+#conteudoAdmin p a:hover {
+  transform: translateY(-2px);
+  border-color: var(--accent);
+  box-shadow: var(--shadow-md);
+}
+
+body > p > a:not([href="/"]):hover::before,
+body > p > a:not([href="/"]):hover::after,
+#conteudoAdmin p a:hover::before,
+#conteudoAdmin p a:hover::after {
+  color: var(--link);
+}
+
+body > p > a:not([href="/"]):hover::after,
+#conteudoAdmin p a:hover::after {
+  transform: translateX(5px);
+}
+
+#conteudoAdmin p {
+  margin: 0 0 0.6rem;
+}
+
+/* "Estatísticas — Em desenvolvimento" */
+#conteudoAdmin p:not(:has(a)) {
+  padding: 1rem 1.25rem;
+  font-style: italic;
+  color: var(--muted);
+  border: 1px dashed var(--border-strong);
+  border-radius: var(--radius);
+}
+
+/* texto de apresentação do índice */
+body > h2 + p {
+  color: var(--muted);
+}
+
+body > p:has(> a:not([href="/"])) {
+  margin-bottom: 0.6rem;
+}

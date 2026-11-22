@@ -4,7 +4,7 @@ document.addEventListener("DOMContentLoaded", async function() {
     const conteudo = document.getElementById("conteudoTurmas");
     const token = sessionStorage.getItem("access_token");
 
-    if (!token || sessionStorage.getItem("is_admin") !== "true") {
+    if (!token || sessionStorage.getItem("role") !== "admin") {
         mensagem.textContent = "Não tens autorização para aceder a esta página.";
         return;
     }

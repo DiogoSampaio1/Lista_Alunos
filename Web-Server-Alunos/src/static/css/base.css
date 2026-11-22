@@ -1,0 +1,171 @@
+/* ==========================================================================
+   base.css — reset, tipografia, fundo, coluna única alinhada à esquerda
+   ========================================================================== */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  scrollbar-gutter: stable;
+  accent-color: var(--accent);
+  scroll-behavior: smooth;
+}
+
+body {
+  position: relative;
+  isolation: isolate;
+  max-width: 880px;
+  min-height: 100dvh;
+  margin: 0 auto;
+  padding: clamp(1.25rem, 4vw, 3rem) clamp(1rem, 4vw, 2rem) 4rem;
+  font: 16px/1.6 system-ui, "Segoe UI Variable Text", "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  color: var(--text);
+  background: var(--bg);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+/* Fundo: grelha de pontos quase impercetível que se desvanece para baixo */
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background-image: radial-gradient(var(--dot) 1px, transparent 1.2px);
+  background-size: 24px 24px;
+  -webkit-mask-image: linear-gradient(180deg, #000, transparent 65%);
+  mask-image: linear-gradient(180deg, #000, transparent 65%);
+}
+
+/* Linha de progresso no topo a cada abertura de página */
+body::before {
+  content: "";
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 50;
+  height: 2px;
+  background: linear-gradient(90deg, var(--accent), #22d3ee);
+  transform-origin: left;
+  animation: bar 1s var(--ease) both;
+  pointer-events: none;
+}
+
+::selection {
+  background: var(--accent);
+  color: #fff;
+}
+
+/* Tipografia */
+h1,
+h2,
+h3 {
+  margin: 0;
+  letter-spacing: -0.025em;
+  text-wrap: balance;
+}
+
+h1 {
+  margin: 1.5rem 0 1.9rem;
+  text-align: left; /* anula o align="center" do HTML */
+  font-size: clamp(1.75rem, 4vw, 2.3rem);
+  font-weight: 700;
+  line-height: 1.15;
+  color: var(--text);
+}
+
+/* pequeno traço de acento que se desenha por baixo do título */
+h1::after {
+  content: "";
+  display: block;
+  width: 2.5rem;
+  height: 3px;
+  margin-top: 0.9rem;
+  border-radius: 3px;
+  background: var(--accent);
+  transform-origin: left;
+  animation: draw 0.8s 0.25s var(--ease) both;
+}
+
+h2 {
+  margin: 2rem 0 0.75rem;
+  font-size: 1.2rem;
+  font-weight: 650;
+  line-height: 1.3;
+}
+
+h3 {
+  font-size: 1rem;
+  font-weight: 650;
+}
+
+p {
+  margin: 0 0 1rem;
+  text-wrap: pretty;
+}
+
+/* o HTML usa <br> para espaçar; o CSS trata disso */
+body > br,
+form br,
+#authInfo br {
+  display: none;
+}
+
+/* Ligações */
+a {
+  color: var(--link);
+  font-weight: 600;
+  text-decoration: underline;
+  text-decoration-color: transparent;
+  text-decoration-thickness: 1.5px;
+  text-underline-offset: 0.25em;
+  transition: text-decoration-color 0.2s, color 0.2s;
+}
+
+a:hover {
+  text-decoration-color: currentColor;
+}
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+  border-radius: 6px;
+}
+
+/* Ligações "Voltar" no fim das páginas: texto simples com seta */
+body > a,
+body > p > a[href="/"] {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  margin: 1.5rem 1.5rem 0 0;
+  color: var(--muted);
+  font-size: 0.92rem;
+  text-decoration: none;
+}
+
+body > p {
+  margin-bottom: 0;
+}
+
+body > a::before,
+body > p > a[href="/"]::before {
+  content: "←";
+  transition: transform 0.3s var(--ease);
+}
+
+body > a:hover,
+body > p > a[href="/"]:hover {
+  color: var(--text);
+}
+
+body > a:hover::before,
+body > p > a[href="/"]:hover::before {
+  transform: translateX(-4px);
+}

@@ -4,6 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
     <title>Gestão de Alunos</title>
 </head>
 
@@ -22,9 +23,16 @@
         <a href="/admin">Menu de Administração</a>
     </p>
 
+     <p id="profMenu" style="display: none;">
+        <a href="/prof">Menu de Professores</a>
+    </p>
+
     <script>
-        if (sessionStorage.getItem("is_admin") === "true") {
+        if (sessionStorage.getItem("role") === "admin") {
             document.getElementById("adminMenu").style.display = "block";
+        }
+        if (sessionStorage.getItem("role") === "professor") {
+            document.getElementById("profMenu").style.display = "block";
         }
     </script>
 
