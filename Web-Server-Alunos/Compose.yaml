@@ -31,7 +31,7 @@ services:
       MYSQL_PASSWORD: ${MYSQL_PASSWORD:-Alunos_dev}
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-root_mysql_dev}
     ports:
-      - "3307:3306"
+      - "3306:3306"
     volumes:
       - mysql_data:/var/lib/mysql
       - ./Volumes/database/mysql:/docker-entrypoint-initdb.d:ro

@@ -8,7 +8,7 @@ body:has(#loginForm) {
   flex-direction: column;
   align-items: flex-start;
   justify-content: center;
-  max-width: 440px;
+  max-width: 26rem;
 }
 
 body:has(#loginForm) h1 {
@@ -26,79 +26,98 @@ body:has(#loginForm) form {
 
 body:has(#loginForm) button[type="submit"] {
   width: 100%;
-  margin: 1.6rem 0 0;
+  margin: 1.75rem 0 0;
 }
 
-/* ---------- Mosaicos numerados (índice e menu admin) ---------- */
-body,
-#conteudoAdmin {
-  counter-reset: tile;
-}
-
-body > p > a:not([href="/"]),
-#conteudoAdmin p a {
-  counter-increment: tile;
+/* ---------- Índice e menus (admin / professor): lista de linhas finas ----------
+   Escopo pelo conteúdo de cada página, para não apanhar as ligações "Voltar". */
+body:has(#adminMenu) > p > a,
+#conteudoAdmin p a,
+#conteudoProf p a {
   display: flex;
   align-items: center;
+  justify-content: space-between;
   gap: 1rem;
-  padding: 1rem 1.25rem;
-  font-weight: 600;
+  margin: 0;
+  padding: 0.95rem 0;
+  font-size: 1.05rem;
+  font-weight: 500;
   color: var(--text);
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  box-shadow: var(--shadow-sm);
   text-decoration: none;
-  transition: transform 0.25s var(--ease), border-color 0.25s, box-shadow 0.25s;
+  border-bottom: 1px solid var(--line);
+  transition: color 0.2s, padding-left 0.3s var(--ease), border-color 0.2s;
 }
 
-/* número em tipo mono */
-body > p > a:not([href="/"])::before,
-#conteudoAdmin p a::before {
-  content: counter(tile, decimal-leading-zero);
-  font: 500 0.8rem ui-monospace, "Cascadia Mono", Consolas, monospace;
+/* o índice não usa a seta de "Voltar" */
+body:has(#adminMenu) > p > a::before {
+  content: none;
+}
+
+/* chevron desenhado em CSS */
+body:has(#adminMenu) > p > a::after,
+#conteudoAdmin p a::after,
+#conteudoProf p a::after {
+  content: "";
+  flex: none;
+  width: 0.45rem;
+  height: 0.45rem;
+  border-top: 1.5px solid currentColor;
+  border-right: 1.5px solid currentColor;
+  opacity: 0.35;
+  transform: rotate(45deg);
+  transition: opacity 0.2s, transform 0.3s var(--ease);
+}
+
+body:has(#adminMenu) > p > a:hover,
+#conteudoAdmin p a:hover,
+#conteudoProf p a:hover {
+  padding-left: 0.5rem;
+  color: var(--accent);
+  border-bottom-color: var(--accent);
+}
+
+body:has(#adminMenu) > p > a:hover::after,
+#conteudoAdmin p a:hover::after,
+#conteudoProf p a:hover::after {
+  opacity: 1;
+  transform: translateX(3px) rotate(45deg);
+}
+
+/* a primeira linha de cada lista também leva linha em cima */
+body:has(#adminMenu) > h2 + p + p > a,
+#conteudoAdmin h2 + p a,
+#conteudoProf h2 + p a {
+  border-top: 1px solid var(--line);
+}
+
+#conteudoAdmin p,
+#conteudoProf p,
+body:has(#adminMenu) > p:has(> a) {
+  margin: 0;
+}
+
+/* títulos de secção dos menus: discretos */
+#conteudoAdmin h2,
+#conteudoProf h2 {
+  margin: 2.5rem 0 0.6rem;
+  font-size: 0.92rem;
+  font-weight: 600;
   color: var(--muted);
-  transition: color 0.25s;
 }
 
-body > p > a:not([href="/"])::after,
-#conteudoAdmin p a::after {
-  content: "→";
-  margin-left: auto;
-  color: var(--muted);
-  transition: transform 0.3s var(--ease-spring), color 0.25s;
-}
-
-body > p > a:not([href="/"]):hover,
-#conteudoAdmin p a:hover {
-  transform: translateY(-2px);
-  border-color: var(--accent);
-  box-shadow: var(--shadow-md);
-}
-
-body > p > a:not([href="/"]):hover::before,
-body > p > a:not([href="/"]):hover::after,
-#conteudoAdmin p a:hover::before,
-#conteudoAdmin p a:hover::after {
-  color: var(--link);
-}
-
-body > p > a:not([href="/"]):hover::after,
-#conteudoAdmin p a:hover::after {
-  transform: translateX(5px);
-}
-
-#conteudoAdmin p {
-  margin: 0 0 0.6rem;
+#conteudoAdmin h2:first-child,
+#conteudoProf h2:first-child {
+  margin-top: 0;
 }
 
 /* "Estatísticas — Em desenvolvimento" */
-#conteudoAdmin p:not(:has(a)) {
-  padding: 1rem 1.25rem;
-  font-style: italic;
+#conteudoAdmin p:not(:has(a)),
+#conteudoProf p:not(:has(a)) {
+  padding: 0.95rem 0;
+  font-size: 1.05rem;
   color: var(--muted);
-  border: 1px dashed var(--border-strong);
-  border-radius: var(--radius);
+  opacity: 0.75;
+  border-bottom: 1px solid var(--line);
 }
 
 /* texto de apresentação do índice */
@@ -106,6 +125,123 @@ body > h2 + p {
   color: var(--muted);
 }
 
-body > p:has(> a:not([href="/"])) {
-  margin-bottom: 0.6rem;
+/* ---------- Gerir alunos de turmas ---------- */
+.secao {
+  padding: 1.75rem 0;
+  border-top: 1px solid var(--line);
+}
+
+.secao:first-child {
+  padding-top: 0;
+  border-top: 0;
+}
+
+.secao h2 {
+  margin: 0 0 0.9rem;
+}
+
+.campo select {
+  max-width: 30rem;
+}
+
+/* campo de texto e botão lado a lado */
+#formAdicionarAluno .campo {
+  display: flex;
+  gap: 0.6rem;
+  align-items: stretch;
+}
+
+#formAdicionarAluno .campo input {
+  flex: 1;
+  min-width: 0;
+}
+
+#formAdicionarAluno .campo button {
+  margin: 0;
+  white-space: nowrap;
+}
+
+/* ficha da turma e do utilizador: rótulo à esquerda, valor à direita */
+#infoTurma h2 {
+  font-family: var(--font-display);
+  font-size: 1.7rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+#infoTurma p,
+#infoAluno p {
+  margin: 0;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid var(--line);
+}
+
+#infoTurma p strong,
+#infoAluno p strong {
+  display: inline-block;
+  min-width: 9rem;
+  font-weight: 500;
+  color: var(--muted);
+}
+
+#infoAluno {
+  margin-top: 1.5rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--line);
+}
+
+#infoAluno h3 {
+  margin-bottom: 0.75rem;
+}
+
+/* lista de alunos inscritos (criada pelo JS): linhas finas, qualquer estrutura */
+div#listaAlunos > p {
+  color: var(--muted);
+}
+
+div#listaAlunos ul,
+div#listaAlunos ol {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+div#listaAlunos li,
+div#listaAlunos > div {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.7rem 0;
+  border-bottom: 1px solid var(--line);
+}
+
+/* ---------- Adicionar aluno / turma: etiqueta à esquerda, campo à direita ---------- */
+@media (min-width: 641px) {
+  #adicionarAlunoForm,
+  #adicionarTurmaForm {
+    display: grid;
+    grid-template-columns: 10rem 1fr;
+    gap: 1rem 1.5rem;
+    align-items: center;
+  }
+
+  #adicionarAlunoForm label,
+  #adicionarTurmaForm label {
+    margin: 0;
+  }
+
+  #adicionarAlunoForm button,
+  #adicionarTurmaForm button {
+    grid-column: 2;
+    justify-self: start;
+    margin: 0.75rem 0 0;
+  }
+}
+
+@media (max-width: 640px) {
+  /* botão ao lado do campo continua com largura própria */
+  #formAdicionarAluno .campo button {
+    width: auto;
+  }
 }

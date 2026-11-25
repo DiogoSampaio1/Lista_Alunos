@@ -1,74 +1,66 @@
 /* ==========================================================================
-   tokens.css — variáveis de design (minimalista: neutros + 1 acento azul)
+   tokens.css — papel frio, tinta azul-marinho, um único acento verde-azulado.
    Claro por defeito; escuro automático conforme o sistema.
-   Contrastes (WCAG AA): texto > 15:1 | texto secundário > 6:1 |
-   botão primário (branco sobre #2563eb) 5.2:1 | botão perigo (branco sobre #b91c1c) 6.5:1
-   Regra: cada botão define fundo E letra em conjunto (ver components.css),
-   por isso a letra nunca fica igual ao fundo.
+   Contrastes (WCAG AA): texto >15:1 | secundário >5.5:1 | acento >5:1
    ========================================================================== */
 
 :root {
   color-scheme: light dark;
 
-  --bg: #fafafa;
+  --bg: #f5f7f8;
   --surface: #ffffff;
-  --surface-2: #f4f4f5;
+  --surface-2: #edf1f4;
   --field: #ffffff;
-  --border: #e4e4e7;
-  --border-strong: #d4d4d8;
+  --line: #dde3e8;
+  --line-strong: #c3ccd5;
 
-  --text: #18181b;
-  --muted: #5b5f6b;
-  --placeholder: #8a8e99;
+  --text: #0e1a2b;
+  --muted: #566274;
+  --placeholder: #7f8a99;
 
-  --accent: #2563eb;
-  --accent-hover: #1d4ed8;
-  --accent-soft: rgba(37, 99, 235, 0.1);
-  --on-accent: #ffffff;
-  --link: #1d4ed8;
+  --accent: #0b6e7a;
+  --accent-hover: #08565f;
+  --accent-soft: rgba(11, 110, 122, 0.14);
 
-  --ok: #047857;
-  --warn: #b45309;
-  --danger: #b91c1c;
-  --danger-solid: #b91c1c;
-  --on-danger: #ffffff;
+  --ok: #0f7a4f;
+  --warn: #a15c00;
+  --danger: #b3261e;
 
-  --track: #a1a1aa;
-  --dot: rgba(24, 24, 27, 0.1);
-  --ring: 0 0 0 3px rgba(37, 99, 235, 0.28);
-  --shadow-sm: 0 1px 2px rgba(24, 24, 27, 0.06);
-  --shadow-md: 0 10px 24px -14px rgba(24, 24, 27, 0.28);
+  --track: #a9b3bf;
+  --ring: 0 0 0 3px rgba(11, 110, 122, 0.28);
 
-  --radius: 14px;
-  --radius-sm: 10px;
+  --radius: 8px;
+  --radius-sm: 6px;
+
+  --font-body: system-ui, "Segoe UI Variable Text", "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-display: "Iowan Old Style", "Palatino Linotype", Palatino, "Book Antiqua", Georgia, serif;
+
   --ease: cubic-bezier(0.22, 1, 0.36, 1);
   --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --bg: #09090b;
-    --surface: #111114;
-    --surface-2: #18181c;
-    --field: #18181c;
-    --border: #26262c;
-    --border-strong: #3a3a43;
+    --bg: #0a111c;
+    --surface: #101826;
+    --surface-2: #162132;
+    --field: #101826;
+    --line: #1f2a3a;
+    --line-strong: #2f3d52;
 
-    --text: #f4f4f5;
-    --muted: #a1a1ab;
-    --placeholder: #7d7d89;
+    --text: #e8edf3;
+    --muted: #93a1b3;
+    --placeholder: #6f7d90;
 
-    --accent-soft: rgba(96, 140, 255, 0.16);
-    --link: #7aa7ff;
+    --accent: #4cc3cf;
+    --accent-hover: #7dd6df;
+    --accent-soft: rgba(76, 195, 207, 0.18);
 
-    --ok: #34d399;
-    --warn: #fbbf24;
-    --danger: #f87171;
+    --ok: #4ade9a;
+    --warn: #f2b441;
+    --danger: #ff8a80;
 
-    --track: #52525b;
-    --dot: rgba(244, 244, 245, 0.09);
-    --ring: 0 0 0 3px rgba(96, 140, 255, 0.35);
-    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.5);
-    --shadow-md: 0 12px 28px -14px rgba(0, 0, 0, 0.9);
+    --track: #455268;
+    --ring: 0 0 0 3px rgba(76, 195, 207, 0.35);
   }
 }
